@@ -13,6 +13,8 @@ Experience = namedtuple('Experience', 'state0, action, reward, state1, terminal1
 
 
 def sample_batch_indexes(low, high, size):
+    # 返回个 List, 里面是要随机取样的Index
+    # 够得话就随机不重复取，不够就带重复地取取满
     if high - low >= size:
         # We have enough data. Draw without replacement, that is each index is unique in the
         # batch. We cannot use `np.random.choice` here because it is horribly inefficient as
@@ -34,6 +36,7 @@ def sample_batch_indexes(low, high, size):
 
 
 class RingBuffer(object):
+    # 
     def __init__(self, maxlen):
         self.maxlen = maxlen
         self.start = 0

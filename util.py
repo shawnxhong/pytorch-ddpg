@@ -6,6 +6,7 @@ from torch.autograd import Variable
 USE_CUDA = torch.cuda.is_available()
 FLOAT = torch.cuda.FloatTensor if USE_CUDA else torch.FloatTensor
 
+# 打印颜色，不管他
 def prRed(prt): print("\033[91m {}\033[00m" .format(prt))
 def prGreen(prt): print("\033[92m {}\033[00m" .format(prt))
 def prYellow(prt): print("\033[93m {}\033[00m" .format(prt))
@@ -24,12 +25,14 @@ def to_tensor(ndarray, volatile=False, requires_grad=False, dtype=FLOAT):
     ).type(dtype)
 
 def soft_update(target, source, tau):
+    # 小改改，打个折扣，新的老的线性组合，慢慢更新
     for target_param, param in zip(target.parameters(), source.parameters()):
         target_param.data.copy_(
             target_param.data * (1.0 - tau) + param.data * tau
         )
 
 def hard_update(target, source):
+    # 一点折扣不打，老的被新的全部更新
     for target_param, param in zip(target.parameters(), source.parameters()):
             target_param.data.copy_(param.data)
 

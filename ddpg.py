@@ -16,7 +16,7 @@ criterion = nn.MSELoss()
 
 class DDPG(object):
     def __init__(self, nb_states, nb_actions, args):
-        
+        # args 就是隐藏层大小，初始值等东西的dict
         if args.seed > 0:
             self.seed(args.seed)
 
@@ -29,18 +29,21 @@ class DDPG(object):
             'hidden2':args.hidden2, 
             'init_w':args.init_w
         }
+        # actor 网络
         self.actor = Actor(self.nb_states, self.nb_actions, **net_cfg)
+        # 用来慢点更新，保证收敛
         self.actor_target = Actor(self.nb_states, self.nb_actions, **net_cfg)
-        self.actor_optim  = Adam(self.actor.parameters(), lr=args.prate)
+        self.actor_optim  = Adam(self.actor.parameters(), lr=args.prate) # Adam优化，随机优化，只需要一阶的梯度，很少的内存
 
         self.critic = Critic(self.nb_states, self.nb_actions, **net_cfg)
         self.critic_target = Critic(self.nb_states, self.nb_actions, **net_cfg)
         self.critic_optim  = Adam(self.critic.parameters(), lr=args.rate)
-
-        hard_update(self.actor_target, self.actor) # Make sure target is with the same weight
+        
+        # Make sure target is with the same weight
+        hard_update(self.actor_target, self.actor)
         hard_update(self.critic_target, self.critic)
         
-        #Create replay buffer
+        # Create replay buffer
         self.memory = SequentialMemory(limit=args.rmsize, window_length=args.window_length)
         self.random_process = OrnsteinUhlenbeckProcess(size=nb_actions, theta=args.ou_theta, mu=args.ou_mu, sigma=args.ou_sigma)
 

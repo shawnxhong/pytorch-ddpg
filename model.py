@@ -8,12 +8,17 @@ import torch.nn.functional as F
 from ipdb import set_trace as debug
 
 def fanin_init(size, fanin=None):
+    # 这是啥啊
     fanin = fanin or size[0]
     v = 1. / np.sqrt(fanin)
     return torch.Tensor(size).uniform_(-v, v)
 
 class Actor(nn.Module):
     def __init__(self, nb_states, nb_actions, hidden1=400, hidden2=300, init_w=3e-3):
+        # nb_states: int, 有几个states
+        # nb_actions: int 有几个actions
+        # 3个全连接层， nb_states -> 400 -> 300 -> nb_actions
+        # 所以不是特殊的神经网络，就是普通的有隐藏层的神经网络
         super(Actor, self).__init__()
         self.fc1 = nn.Linear(nb_states, hidden1)
         self.fc2 = nn.Linear(hidden1, hidden2)
@@ -23,6 +28,7 @@ class Actor(nn.Module):
         self.init_weights(init_w)
     
     def init_weights(self, init_w):
+        # 初始化一下整个张量里面的值
         self.fc1.weight.data = fanin_init(self.fc1.weight.data.size())
         self.fc2.weight.data = fanin_init(self.fc2.weight.data.size())
         self.fc3.weight.data.uniform_(-init_w, init_w)
@@ -41,7 +47,7 @@ class Critic(nn.Module):
         super(Critic, self).__init__()
         self.fc1 = nn.Linear(nb_states, hidden1)
         self.fc2 = nn.Linear(hidden1+nb_actions, hidden2)
-        self.fc3 = nn.Linear(hidden2, 1)
+        self.fc3 = nn.Linear(hidden2, 1) # 最后输出一个动作
         self.relu = nn.ReLU()
         self.init_weights(init_w)
     
@@ -51,6 +57,7 @@ class Critic(nn.Module):
         self.fc3.weight.data.uniform_(-init_w, init_w)
     
     def forward(self, xs):
+        # 输入是个啥？
         x, a = xs
         out = self.fc1(x)
         out = self.relu(out)
